@@ -5,105 +5,55 @@ import { motion } from "framer-motion"
 import { Instagram, ExternalLink, Heart, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-
-interface InstagramPost {
-  id: string
-  media_url: string
-  media_type: string
-  caption?: string
-  permalink: string
-  timestamp: string
-  like_count?: number
-  comments_count?: number
-}
+import AdminControls from "@/components/admin-controls"
+import AdminEditControls from "@/components/admin-edit-controls"
+import { supabase, type InstagramPost } from "@/lib/supabase"
 
 const InstagramSection = () => {
   const [posts, setPosts] = useState<InstagramPost[]>([])
   const [loading, setLoading] = useState(true)
-
-  // Mock data with real architectural images
-  const mockPosts: InstagramPost[] = [
-    {
-      id: "1",
-      media_url: "/images/instagram-1.jpg",
-      media_type: "IMAGE",
-      caption:
-        "Contemporary villa design with clean lines and natural materials. #architecture #design #villa #hariomjangidarchitects",
-      permalink: "https://instagram.com/p/example1",
-      timestamp: "2024-01-15T10:30:00Z",
-      like_count: 245,
-      comments_count: 12,
-    },
-    {
-      id: "2",
-      media_url: "/images/instagram-2.jpg",
-      media_type: "IMAGE",
-      caption:
-        "Urban planning project showcasing sustainable development principles. #urbanplanning #sustainability #architecture",
-      permalink: "https://instagram.com/p/example2",
-      timestamp: "2024-01-12T14:20:00Z",
-      like_count: 189,
-      comments_count: 8,
-    },
-    {
-      id: "3",
-      media_url: "/images/instagram-3.jpg",
-      media_type: "IMAGE",
-      caption: "Minimalist interior design concept for a corporate office space. #interiordesign #minimalism #office",
-      permalink: "https://instagram.com/p/example3",
-      timestamp: "2024-01-10T09:15:00Z",
-      like_count: 312,
-      comments_count: 18,
-    },
-    {
-      id: "4",
-      media_url: "/images/instagram-4.jpg",
-      media_type: "IMAGE",
-      caption:
-        "Green building design incorporating renewable energy solutions. #greenbuilding #sustainable #architecture",
-      permalink: "https://instagram.com/p/example4",
-      timestamp: "2024-01-08T16:45:00Z",
-      like_count: 156,
-      comments_count: 6,
-    },
-    {
-      id: "5",
-      media_url: "/images/instagram-5.jpg",
-      media_type: "IMAGE",
-      caption: "Luxury residential complex with integrated community spaces. #residential #luxury #community #pool",
-      permalink: "https://instagram.com/p/example5",
-      timestamp: "2024-01-05T11:30:00Z",
-      like_count: 278,
-      comments_count: 15,
-    },
-    {
-      id: "6",
-      media_url: "/images/instagram-6.jpg",
-      media_type: "IMAGE",
-      caption:
-        "Cultural center design celebrating local heritage and modern functionality. #culturalcenter #heritage #modern",
-      permalink: "https://instagram.com/p/example6",
-      timestamp: "2024-01-03T13:20:00Z",
-      like_count: 203,
-      comments_count: 9,
-    },
-  ]
+  const [showAdminControls, setShowAdminControls] = useState(false)
 
   useEffect(() => {
-    const fetchInstagramPosts = async () => {
-      try {
-        setTimeout(() => {
-          setPosts(mockPosts)
-          setLoading(false)
-        }, 1000)
-      } catch (error) {
-        console.error("Error fetching Instagram posts:", error)
-        setLoading(false)
+    fetchInstagramPosts()
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.shiftKey && event.key.toLowerCase() === "d") {
+        event.preventDefault()
+        const password = prompt("Enter admin password:")
+        if (password === "hahaharry") {
+          setShowAdminControls(!showAdminControls)
+        }
       }
     }
 
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [showAdminControls])
+
+  const fetchInstagramPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("instagram_posts")
+        .select("*")
+        .order("created_at", { ascending: false })
+
+      if (error) throw error
+      setPosts(data || [])
+    } catch (error) {
+      console.error("Error fetching Instagram posts:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleInstagramAdded = () => {
     fetchInstagramPosts()
-  }, [])
+  }
+
+  const handleInstagramDeleted = () => {
+    fetchInstagramPosts()
+  }
 
   const formatTimeAgo = (timestamp: string) => {
     const now = new Date()
@@ -122,8 +72,22 @@ const InstagramSection = () => {
     return caption.length > maxLength ? caption.substring(0, maxLength) + "..." : caption
   }
 
+  if (loading) {
+    return (
+      <section className="py-16 sm:py-24 px-4 bg-accent">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading Instagram posts...</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="py-16 sm:py-24 px-4 bg-accent">
+      <AdminControls onInstagramAdded={handleInstagramAdded} />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -153,32 +117,26 @@ const InstagramSection = () => {
         </motion.div>
 
         {/* Posts Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {[...Array(6)].map((_, index) => (
-              <div key={index} className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
-            ))}
-          </div>
-        ) : (
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            {posts.map((post, index) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          viewport={{ once: true }}
+        >
+          {posts.map((post, index) => (
+            <motion.div
+              key={post.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              viewport={{ once: true }}
+            >
+              <div className="relative group">
                 <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-500 bg-white">
                   <div className="relative aspect-square overflow-hidden">
                     <img
-                      src={post.media_url || "/placeholder.svg"}
+                      src={post.image || "/placeholder.svg"}
                       alt="Instagram post"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
@@ -188,11 +146,11 @@ const InstagramSection = () => {
                       <div className="flex items-center space-x-6 text-white">
                         <div className="flex items-center space-x-2">
                           <Heart className="h-5 sm:h-6 w-5 sm:w-6" />
-                          <span className="font-medium text-sm sm:text-base">{post.like_count}</span>
+                          <span className="font-medium text-sm sm:text-base">{post.likes}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <MessageCircle className="h-5 sm:h-6 w-5 sm:w-6" />
-                          <span className="font-medium text-sm sm:text-base">{post.comments_count}</span>
+                          <span className="font-medium text-sm sm:text-base">{post.comments}</span>
                         </div>
                       </div>
                     </div>
@@ -206,14 +164,14 @@ const InstagramSection = () => {
                           </div>
                           <div>
                             <p className="text-xs sm:text-sm font-medium">hariomjangidarchitects</p>
-                            <p className="text-xs opacity-80">{formatTimeAgo(post.timestamp)}</p>
+                            <p className="text-xs opacity-80">{formatTimeAgo(post.post_date)}</p>
                           </div>
                         </div>
                         <Button
                           size="sm"
                           variant="ghost"
                           className="text-white hover:bg-white/20 p-1 sm:p-2"
-                          onClick={() => window.open(post.permalink, "_blank")}
+                          onClick={() => window.open(post.post_link || "#", "_blank")}
                         >
                           <ExternalLink className="h-3 sm:h-4 w-3 sm:w-4" />
                         </Button>
@@ -230,21 +188,28 @@ const InstagramSection = () => {
                       <div className="flex items-center space-x-4 text-gray-500">
                         <div className="flex items-center space-x-1">
                           <Heart className="h-3 sm:h-4 w-3 sm:w-4" />
-                          <span className="text-xs">{post.like_count}</span>
+                          <span className="text-xs">{post.likes}</span>
                         </div>
                         <div className="flex items-center space-x-1">
                           <MessageCircle className="h-3 sm:h-4 w-3 sm:w-4" />
-                          <span className="text-xs">{post.comments_count}</span>
+                          <span className="text-xs">{post.comments}</span>
                         </div>
                       </div>
-                      <span className="text-xs text-gray-400">{formatTimeAgo(post.timestamp)}</span>
+                      <span className="text-xs text-gray-400">{formatTimeAgo(post.post_date)}</span>
                     </div>
                   </div>
                 </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
+
+                <AdminEditControls
+                  isVisible={showAdminControls}
+                  itemId={post.id}
+                  itemType="instagram_posts"
+                  onDelete={handleInstagramDeleted}
+                />
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {/* View More Button */}
         <motion.div

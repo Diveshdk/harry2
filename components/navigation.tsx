@@ -4,10 +4,13 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, Phone, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,20 +20,14 @@ const Navigation = () => {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" })
-    }
-    setIsOpen(false)
-  }
-
   const navItems = [
-    { name: "Home", href: "home" },
-    { name: "Projects", href: "projects" },
-    { name: "Publications", href: "publications" },
-    { name: "About Us", href: "about" },
-    { name: "Contact", href: "contact" },
+    { name: "Home", href: "/" },
+    { name: "Projects", href: "/projects" },
+    { name: "Research", href: "/research" },
+    { name: "About Me", href: "/about" },
+    { name: "Design Board", href: "/design-board" },
+    { name: "Achievements", href: "/achievements" },
+    { name: "Contact", href: "/contact" },
   ]
 
   return (
@@ -50,27 +47,34 @@ const Navigation = () => {
               className="flex items-center cursor-pointer"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
-              onClick={() => scrollToSection("home")}
             >
-              <img src="/images/hariom-jangid-logo.png" alt="Hariom Jangid Architects" className="h-8 sm:h-10 w-auto" />
+              <Link href="/">
+                <img
+                  src="/images/hariom-jangid-logo.png"
+                  alt="Hariom Jangid Architects"
+                  className="h-8 sm:h-10 w-auto"
+                />
+              </Link>
             </motion.div>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8">
               {navItems.map((item, index) => (
-                <motion.button
+                <motion.div
                   key={item.name}
-                  onClick={() => scrollToSection(item.href)}
-                  className={`text-sm font-medium tracking-wide transition-colors duration-300 hover:text-primary-500 ${
-                    scrolled ? "text-gray-700" : "text-white/90"
-                  }`}
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1, duration: 0.6 }}
-                  whileHover={{ y: -2 }}
                 >
-                  {item.name}
-                </motion.button>
+                  <Link
+                    href={item.href}
+                    className={`text-sm font-medium tracking-wide transition-colors duration-300 hover:text-primary-500 ${
+                      pathname === item.href ? "text-primary-500" : scrolled ? "text-gray-700" : "text-white/90"
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
+                </motion.div>
               ))}
             </div>
 
@@ -134,16 +138,22 @@ const Navigation = () => {
                 <div className="flex-1 px-6 py-8">
                   <div className="space-y-6">
                     {navItems.map((item, index) => (
-                      <motion.button
+                      <motion.div
                         key={item.name}
-                        onClick={() => scrollToSection(item.href)}
-                        className="block text-2xl font-light text-gray-900 hover:text-primary-500 transition-colors duration-300 w-full text-left"
                         initial={{ opacity: 0, x: 50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1, duration: 0.6 }}
                       >
-                        {item.name}
-                      </motion.button>
+                        <Link
+                          href={item.href}
+                          onClick={() => setIsOpen(false)}
+                          className={`block text-2xl font-light transition-colors duration-300 w-full text-left ${
+                            pathname === item.href ? "text-primary-500" : "text-gray-900 hover:text-primary-500"
+                          }`}
+                        >
+                          {item.name}
+                        </Link>
+                      </motion.div>
                     ))}
                   </div>
                 </div>
