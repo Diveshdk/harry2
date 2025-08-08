@@ -53,10 +53,8 @@ export default function AboutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <span className="text-primary-500 text-sm font-medium tracking-wider uppercase mb-4 block">About Me</span>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-light text-gray-900 mb-6 leading-tight">
-            Hariom Jangid
-          </h1>
+          <span className="text-primary-500 text-sm font-medium tracking-wider uppercase mb-4 block">About Us</span>
+
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Principal Architect & Founder of Hariom Jangid Architects, dedicated to creating innovative and sustainable
             architectural solutions.

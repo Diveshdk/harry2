@@ -1,20 +1,28 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Star, Quote } from "lucide-react"
+import { Star, Quote } from 'lucide-react'
 import { Card, CardContent } from "@/components/ui/card"
+import { supabase, type Testimonial } from "@/lib/supabase"
 
 const TestimonialsSection = () => {
-  // Only show 3 testimonials on homepage
-  const testimonials = [
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Fallback testimonials data
+  const fallbackTestimonials: Testimonial[] = [
     {
       id: 1,
       name: "Rajesh Kumar",
-      role: "CEO, Tech Solutions",
-      company: "Mumbai",
+      role: "CEO",
+      company: "Tech Solutions Mumbai",
       image: "/placeholder-user.jpg",
       rating: 5,
       text: "Hariom Jangid Architects transformed our vision into reality. Their attention to detail and innovative approach resulted in a workspace that truly reflects our company culture.",
+      featured: true,
+      created_at: "2024-01-01",
+      updated_at: "2024-01-01"
     },
     {
       id: 2,
@@ -24,17 +32,50 @@ const TestimonialsSection = () => {
       image: "/placeholder-user.jpg",
       rating: 5,
       text: "Working with this team was an absolute pleasure. They created our dream home while staying within budget and timeline. The sustainable features are exactly what we wanted.",
+      featured: true,
+      created_at: "2024-01-01",
+      updated_at: "2024-01-01"
     },
     {
       id: 3,
       name: "Dr. Amit Patel",
       role: "Hospital Director",
-      company: "Bangalore",
+      company: "Bangalore Medical Center",
       image: "/placeholder-user.jpg",
       rating: 5,
       text: "The healthcare facility they designed for us is both functional and beautiful. Patient feedback has been overwhelmingly positive about the calming and modern environment.",
+      featured: true,
+      created_at: "2024-01-01",
+      updated_at: "2024-01-01"
     },
   ]
+
+  useEffect(() => {
+    fetchTestimonials()
+  }, [])
+
+  const fetchTestimonials = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .eq("featured", true)
+        .order("created_at", { ascending: false })
+        .limit(3)
+
+      if (error) {
+        console.error("Database error:", error)
+        setTestimonials(fallbackTestimonials)
+      } else {
+        setTestimonials(data && data.length > 0 ? data : fallbackTestimonials)
+      }
+    } catch (error) {
+      console.error("Error fetching testimonials:", error)
+      setTestimonials(fallbackTestimonials)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -56,6 +97,37 @@ const TestimonialsSection = () => {
         ease: [0.6, -0.05, 0.01, 0.99],
       },
     },
+  }
+
+  if (loading) {
+    return (
+      <section className="py-16 sm:py-24 px-4 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-4">Client Testimonials</h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+              What our clients say about working with us
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white border rounded-lg shadow-lg animate-pulse p-6">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4" />
+                <div className="h-3 bg-gray-200 rounded w-full mb-2" />
+                <div className="h-3 bg-gray-200 rounded w-5/6 mb-4" />
+                <div className="flex items-center">
+                  <div className="w-12 h-12 bg-gray-200 rounded-full mr-4" />
+                  <div>
+                    <div className="h-3 bg-gray-200 rounded w-20 mb-1" />
+                    <div className="h-2 bg-gray-200 rounded w-16" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (

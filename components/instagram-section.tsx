@@ -17,8 +17,9 @@ const InstagramSection = () => {
   useEffect(() => {
     fetchInstagramPosts()
 
+    // Listen for Ctrl+D to show admin controls
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.shiftKey && event.key.toLowerCase() === "d") {
+      if (event.ctrlKey && event.key.toLowerCase() === "d") {
         event.preventDefault()
         const password = prompt("Enter admin password:")
         if (password === "hahaharry") {

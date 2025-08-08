@@ -54,3 +54,45 @@ export interface InstagramPost {
   created_at: string
   updated_at: string
 }
+
+export interface Testimonial {
+  id: number
+  name: string
+  role: string
+  company: string
+  image?: string
+  rating: number
+  text: string
+  featured: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Achievement {
+  id: number
+  title: string
+  organization: string
+  year: string
+  category: 'award' | 'certification' | 'publication'
+  icon: string
+  description?: string
+  image?: string
+  certificate_url?: string
+  featured: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Publication {
+  id: number
+  title: string
+  journal: string
+  date: string
+  author: string
+  image?: string
+  description?: string
+  link?: string
+  featured: boolean
+  created_at: string
+  updated_at: string
+}
