@@ -97,11 +97,11 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
           >
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light mb-6 leading-tight">
+            <h1 className="text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl font-light mb-6 leading-tight">
               Designing Tomorrow's
               <span className="block text-primary-400">Architecture</span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl mb-8 text-blue/90 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl md:text-2xl mb-8 text-white/90 max-w-2xl mx-auto">
               Creating sustainable, innovative spaces that inspire and endure for generations to come.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
